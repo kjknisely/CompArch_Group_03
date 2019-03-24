@@ -34,7 +34,7 @@ int main(int argc, char *argv[]){
 			i++;
 			cachesize = atoi(argv[i]);
 			if(cachesize < 1024 || cachesize > 8388608){
-				printf("Invalid cache size, 1KB(1024) to 8MB(8388608): EXITTING\n");
+				printf("Invalid cache size, 1KB(1) to 8MB(8192): EXITTING\n");
 				return -3;
 			}
 		}else if(strcmp(argv[i], "-b")==0){
