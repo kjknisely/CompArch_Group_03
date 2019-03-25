@@ -68,9 +68,9 @@ int main(int argc, char *argv[]){
 			if(strcmp(argv[i], "RR")==0){
 				replacement = 1; /*****replacement policy round robin == 1*******/
 			}else if(strcmp(argv[i],"RND")==0){
-				replacement = 2; /*****replacement policy is random == 3*********/
+				replacement = 2; /*****replacement policy is random == 2*********/
 			}else if(strcmp(argv[i], "LRU")==0){
-				replacement = 3; /*****replacement policy is LeastRecentlyUsed == 5****/
+				replacement = 3; /*****replacement policy is LeastRecentlyUsed == 3****/
 			}else{
 				printf("Invalid replacement policy(RR RND LRU): EXITING\n");
 				return -6;
