@@ -125,7 +125,7 @@ void printCalculatedValues(int cachesize, int blocksize, int associativity, int 
 	int tagSize = calculateTagSize(blocksize, indexSize);
 	if(totalBlocks < 1024)
 	{
-		printf("Total # Blocks: %d K (2^%.0lf)\n", totalBlocks, (log(totalBlocks)/(log(2))));
+		printf("Total # Blocks: %d (2^%.0lf)\n", totalBlocks, (log(totalBlocks)/(log(2))));
 	}else
 	{
 		printf("Total # Blocks: %d K (2^%.0lf)\n", totalBlocks / 1024, log(totalBlocks/1024)/log(2)+10); 

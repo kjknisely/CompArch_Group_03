@@ -7,7 +7,7 @@ PROGRAMS = \
 	Sim.exe
 
 CC = gcc
-CFLAGS = -g -Wall -lm
+CFLAGS = -lm -g -Wall
 
 all: $(PROGRAMS)
 
@@ -17,5 +17,5 @@ scratch:
 	rm -f *.o *.a $(PROGRAMS)
 
 Sim.exe: Sim.c
-	$(CC) $(CFLAGS) Sim.c -o Sim.exe
+	$(CC) Sim.c -o Sim.exe $(CFLAGS)
 
