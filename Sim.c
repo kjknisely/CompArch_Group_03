@@ -13,7 +13,7 @@ Sabrina Mosher
 
 int ADDRESS_SPACE = 32; // 32-bit address space
 
-void printHeader(char *argv[], int cachesize, int blocksize, int associativity, int replacement);
+void printHeader(char *argv[], int cachesize, int blocksize, int associativity, int replacement, int argc, char *infilename);
 char *getPolicyString(int replacement);
 void printCalculatedValues(int cachesize, int blocksize, int associativity, int replacement);
 int calculateTotalBlocks(int cachesize, int blocksize);
@@ -28,7 +28,7 @@ int main(int argc, char *argv[]){
 	FILE *infp = NULL;
 	int cachesize = 0, blocksize = 0;
 	int associativity = 0, replacement = -1;
-
+	char *infilename=NULL;
 	if(argc != 11){
 		printf("Usage: %s -f <trace file name> -s <cache size in KB> -b <block size> -a <associativity> -r <replacment policy(LRU,RR,RND)>\n", argv[0]);
 		return -1;
@@ -42,6 +42,7 @@ int main(int argc, char *argv[]){
 				printf("Unable to open %s, EXITING\n", argv[i]);
 				return -2;
 			}
+			infilename = argv[i];
 		}else if(strcmp(argv[i], "-s")==0){
 			i++;
 			cachesize = atoi(argv[i]);
@@ -68,9 +69,9 @@ int main(int argc, char *argv[]){
 			if(strcmp(argv[i], "RR")==0){
 				replacement = 1; /*****replacement policy round robin == 1*******/
 			}else if(strcmp(argv[i],"RND")==0){
-				replacement = 2; /*****replacement policy is random == 2*********/
+				replacement = 2; /*****replacement policy is random == 3*********/
 			}else if(strcmp(argv[i], "LRU")==0){
-				replacement = 3; /*****replacement policy is LeastRecentlyUsed == 3****/
+				replacement = 3; /*****replacement policy is LeastRecentlyUsed == 5****/
 			}else{
 				printf("Invalid replacement policy(RR RND LRU): EXITING\n");
 				return -6;
@@ -81,7 +82,7 @@ int main(int argc, char *argv[]){
 		}
 	}
 
-	printHeader(argv, cachesize, blocksize, associativity, replacement);
+	printHeader(argv, cachesize, blocksize, associativity, replacement, argc, infilename);
 	printCalculatedValues(cachesize, blocksize, associativity, replacement);
 	printCacheHitRate();
 
@@ -89,10 +90,16 @@ int main(int argc, char *argv[]){
 	return 1;
 }
 
-void printHeader(char *argv[], int cachesize, int blocksize, int associativity, int replacement){
+void printHeader(char *argv[], int cachesize, int blocksize, int associativity, int replacement, int argc, char *filename){
+	int i;
+
 	printf("CS 3853 Spring 2019 - Group #3\n");
-	printf("Cmd Line: %s -f %s -s %s -b %s -a %s -r %s\n"
-		, argv[0], argv[2], argv[4], argv[6], argv[8], argv[10]);
+	printf("Cmd Line:");
+	for(i=0;i<argc;i++)
+	{		
+		printf("%s ",argv[i]);
+	}
+	printf("\n");
 	printf("Trace File: %s\n", argv[2]);
 	printf("Cache Size: %d KB\n", cachesize);
 	printf("Block Size: %d bytes\n", blocksize);
