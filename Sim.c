@@ -124,7 +124,7 @@ void printCalculatedValues(int cachesize, int blocksize, int associativity, int 
 	int totalIndices = calculateTotalIndices(indexSize);
 	int tagSize = calculateTagSize(blocksize, indexSize);
 
-	printf("Total # Blocks: %d K (2^%d)\n", totalBlocks / 1024, blocksize); 
+	printf("Total # Blocks: %d K (2^%.0lf)\n", totalBlocks / 1024, log(totalBlocks/1024)/log(2)+10); 
 	printf("Tag Size: %d bits\n", tagSize);
 	printf("Index Size: %d bits, Total Indices: %d K\n", indexSize, totalIndices);
 	printf("Implementation Memory Size: %d bytes\n", calculateImplementationMemorySize(tagSize, totalBlocks));
