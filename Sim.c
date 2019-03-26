@@ -84,8 +84,7 @@ int main(int argc, char *argv[]){
 	printHeader(argv, argc, infilename);
 	printCalculatedValues();
 	printCacheHitRate();
-    parseTrace(infp);
-
+	parseTrace(infp);
 
 	fclose(infp);
 	return 1;
@@ -184,7 +183,7 @@ void printHeader(char *argv[], int argc, char *filename){
 
 	printf("Cache Simulator CS 3853 Spring 2019 - Group #3\n\n");
 
-    // command line arguments
+    	// command line arguments
 	printf("Cmd Line:");
 	for(i=0;i<argc;i++)
 	{		
@@ -192,7 +191,7 @@ void printHeader(char *argv[], int argc, char *filename){
 	}
 	printf("\n");
 
-    // parsed info
+    	// parsed info
 	printf("Trace File: %s\n", argv[2]);
 	printf("Cache Size: %d KB\n", cachesize);
 	printf("Block Size: %d bytes\n", blocksize);
@@ -237,7 +236,7 @@ void printCalculatedValues(){
 		printf("Index Size: %d bits, Total Indices: %d K\n", indexSize, totalIndices);
 	}
 	printf("Overhead Memory Size: %d bytes\n", calculateOverheadMemorySize(tagSize, totalBlocks));
-    printf("Implementation Memory Size: %d bytes\n", cachesize * 1024 + calculateOverheadMemorySize(tagSize, totalBlocks));
+    	printf("Implementation Memory Size: %d bytes\n", cachesize * 1024 + calculateOverheadMemorySize(tagSize, totalBlocks));
 	printf("\n");
 }
 
