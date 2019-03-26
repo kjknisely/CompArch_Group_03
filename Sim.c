@@ -238,7 +238,8 @@ void printCalculatedValues(){
 	}else{
 		printf("Index Size: %d bits, Total Indices: %d K\n", indexSize, totalIndices);
 	}
-	printf("Implementation Memory Size: %d bytes\n", calculateImplementationMemorySize(tagSize, totalBlocks));
+	printf("Overhead Memory Size: %d bytes\n", calculateOverheadMemorySize(tagSize, totalBlocks));
+    printf("Implementation Memory Size: %d bytes\n", cachesize * 1024 + calculateOverheadMemorySize(tagSize, totalBlocks));
 	printf("\n");
 }
 
@@ -274,7 +275,7 @@ int calculateTotalIndices(int indexSize){
 /* 
  * Calculate the impelementation's memory size
  */
-int calculateImplementationMemorySize(int tagSize, int totalBlocks){
+int calculateOverheadMemorySize(int tagSize, int totalBlocks){
 	return ((tagSize + 1) * totalBlocks) / 8;
 }
 

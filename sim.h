@@ -5,7 +5,7 @@ int calculateTotalBlocks(int cachesize, int blocksize);
 int calculateTagSize(int blocksize, int indexSize);
 int calculateIndexSize(int totalBlocks, int associativity);
 int calculateTotalIndices(int indexSize);
-int calculateImplementationMemorySize(int tagSize, int totalBlocks);
+int calculateOverheadMemorySize(int tagSize, int totalBlocks);
 void printCacheHitRate();
 void parseTrace(FILE * traceFile);
 void printTraceData(int eAddr, int eSize, int wAddr, int rAddr);
