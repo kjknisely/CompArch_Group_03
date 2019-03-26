@@ -273,7 +273,7 @@ int calculateTotalIndices(int indexSize){
  * Calculate the impelementation's memory size
  */
 int calculateOverheadMemorySize(int tagSize, int totalBlocks){
-	return ((tagSize + 1) * totalBlocks) / 8;
+	return (int)ceil(((tagSize + 1) * totalBlocks) / 8.0);
 }
 
 /*
