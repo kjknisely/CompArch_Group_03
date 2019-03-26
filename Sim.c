@@ -106,8 +106,6 @@ void parseTrace(FILE * traceFile)
     while (fgets(buf, 999, traceFile) != NULL)
     {
         // not EIP line
-        if (strlen(buf) == 0 || strcmp(buf, "\n") == 0)
-            continue;
         if (buf[0] == 'E') {
             parseEipLine(buf, &eAddr, &eSize);
             // store first 20 addresses and size
@@ -117,9 +115,9 @@ void parseTrace(FILE * traceFile)
                 cnt++;
             }
         }
-        else if (buf[0] = 'd') {
+        else if (buf[0] == 'd') {
             parseDataLine(buf, &wAddr, &rAddr);
-            printTraceData(eAddr, eSize, wAddr, rAddr);
+            //printTraceData(eAddr, eSize, wAddr, rAddr);
         }
     }
 
