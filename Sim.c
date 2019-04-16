@@ -173,15 +173,40 @@ void parseTrace(FILE * traceFile)
 										index = eAddr << cache.tagSize;
 										index = index >> cache.tagSize;
 										index = index >> cache.offsetSize;
-										printf("\t%x->%x %d", eAddr, index, cache.offsetSize);
+										printf("\t%x->%x", eAddr, index);
 										tag = eAddr >> (cache.indexSize + cache.offsetSize);
 										printf("\t\t%x->%x\n", eAddr, tag);
 										cnt++;
+								//checkcachetable()
             		}
         	}
         	else if (buf[0] == 'd') {
             		parseDataLine(buf, &wAddr, &rAddr);
            		// printTraceData(eAddr, eSize, wAddr, rAddr);
+							if (wAddr != 0){
+							               		offset = eAddr << (cache.tagSize + cache.indexSize);
+										offset = offset >> (cache.tagSize + cache.indexSize);
+										printf("%x->%x", eAddr, offset);
+										index = eAddr << cache.tagSize;
+										index = index >> cache.tagSize;
+										index = index >> cache.offsetSize;
+										printf("\t%x->%x", eAddr, index);
+										tag = eAddr >> (cache.indexSize + cache.offsetSize);
+										printf("\t\t%x->%x\n", eAddr, tag);
+							//checkcachetable()
+							}
+							if (rAddr !=0){
+							               		offset = eAddr << (cache.tagSize + cache.indexSize);
+										offset = offset >> (cache.tagSize + cache.indexSize);
+										printf("%x->%x", eAddr, offset);
+										index = eAddr << cache.tagSize;
+										index = index >> cache.tagSize;
+										index = index >> cache.offsetSize;
+										printf("\t%x->%x", eAddr, index);
+										tag = eAddr >> (cache.indexSize + cache.offsetSize);
+										printf("\t\t%x->%x\n", eAddr, tag);
+							//checkcachetable()
+							}
         	}
     	}
 
