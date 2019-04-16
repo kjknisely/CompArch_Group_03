@@ -101,6 +101,7 @@ void configureCache()
         cache.indexSize = calculateIndexSize(cache.totalBlocks);
         cache.totalIndices = calculateTotalIndices(cache.indexSize);
         cache.tagSize = calculateTagSize(cache.indexSize);
+				cache.offsetSize = (log(cache.blocksize)/(log(2)));
 	
 	// Allocate cache memory
 	cache.indices = malloc(sizeof(Index) * cache.totalIndices);
@@ -153,6 +154,9 @@ void parseTrace(FILE * traceFile)
     	int addrs[20];
     	int sizes[20];
     	int cnt = 0;
+			unsigned int offset;
+			unsigned int index;
+			unsigned int tag;
 
     	// read to eof
     	while (fgets(buf, 999, traceFile) != NULL)
@@ -162,9 +166,17 @@ void parseTrace(FILE * traceFile)
             		parseEipLine(buf, &eAddr, &eSize);
             		// store first 20 addresses and size
             		if (cnt < 20) {
-                		addrs[cnt] = eAddr;
-                		sizes[cnt] = eSize;
-                		cnt++;
+                		
+                		offset = eAddr << (cache.tagSize + cache.indexSize);
+										offset = offset >> (cache.tagSize + cache.indexSize);
+										printf("%x->%x", eAddr, offset);
+										index = eAddr << cache.tagSize;
+										index = index >> cache.tagSize;
+										index = index >> cache.offsetSize;
+										printf("\t%x->%x %d", eAddr, index, cache.offsetSize);
+										tag = eAddr >> (cache.indexSize + cache.offsetSize);
+										printf("\t\t%x->%x\n", eAddr, tag);
+										cnt++;
             		}
         	}
         	else if (buf[0] == 'd') {
@@ -175,10 +187,12 @@ void parseTrace(FILE * traceFile)
 
     	int i;
     	// print the rest in a list
-    	for (i = 0; i < 20; i++)
+/*    	
+			for (i = 0; i < 20; i++)
     	{
         	printf("0x%08x: (%d)\n", addrs[i], sizes[i]);
     	}
+			*/
 }
 
 /*

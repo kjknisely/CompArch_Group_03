@@ -19,6 +19,7 @@ typedef struct {
 	int indexSize;
 	int totalIndices;
 	int tagSize;
+	int offsetSize;
 	Index *indices;
 } Cache;
 
