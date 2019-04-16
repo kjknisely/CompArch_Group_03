@@ -14,9 +14,9 @@ Sabrina Mosher
 #include <math.h>
 #include "sim.h"
 
-
 static int ADDRESS_SPACE = 32; // 32-bit address space
-static int cachesize = 0, blocksize = 0, associativity = 0, replacement = -1;
+
+Cache cache;
 
 int main(int argc, char *argv[]){
 	int i;
@@ -26,10 +26,9 @@ int main(int argc, char *argv[]){
 		printf("Usage: %s -f <trace file name> -s <cache size in KB> -b <block size> -a <associativity> -r <replacment policy(LRU,RR,RND)>\n", argv[0]);
 		return -1;
 	}
-
-    // get all of the command line arguments
+    	// get all of the command line arguments
 	for(i=1;i<argc;i++){
-        // trace file name
+        	// trace file name
 		if(strcmp(argv[i],"-f")==0){
 			i++;
 			infp = fopen(argv[i], "r");
@@ -38,39 +37,39 @@ int main(int argc, char *argv[]){
 				return -2;
 			}
 			infilename = argv[i];
+		// cache size
 		}else if(strcmp(argv[i], "-s")==0){
-            // cache size
 			i++;
-			cachesize = atoi(argv[i]);
-			if(cachesize < 1 || cachesize > 8192){
+			cache.cachesize = atoi(argv[i]);
+			if(cache.cachesize < 1 || cache.cachesize > 8192){
 				printf("Invalid cache size, 1KB(1) to 8MB(8192): EXITING\n");
 				return -3;
 			}
+		// block size
 		}else if(strcmp(argv[i], "-b")==0){
-            // block size
 			i++;
-			blocksize = atoi(argv[i]);
-			if(blocksize < 4 || blocksize > 64){
+			cache.blocksize = atoi(argv[i]);
+			if(cache.blocksize < 4 || cache.blocksize > 64){
 				printf("Invalid block size, blocks are 4B->64B: EXITING\n");
 				return -4;
 			}
+		// associativity
 		}else if(strcmp(argv[i], "-a")==0){
-            // associativity
 			i++;
-			associativity = atoi(argv[i]);
-			if(!(associativity == 1 || associativity == 2 || associativity == 4 || associativity == 8 || associativity == 16)){
+			cache.associativity = atoi(argv[i]);
+			if(!(cache.associativity == 1 || cache.associativity == 2 || cache.associativity == 4 || cache.associativity == 8 || cache.associativity == 16)){
 				printf("Invalid associativity rate(1 2 4 8 16): EXITING\n");
 				return -5;
 			}
+		// replacement policy
 		}else if(strcmp(argv[i], "-r")==0){
-            // replacement policy
 			i++;
 			if(strcmp(argv[i], "RR")==0){
-				replacement = 1; /*****replacement policy round robin == 1*******/
+				cache.replacement = 1; // replacement policy round robin == 1
 			}else if(strcmp(argv[i],"RND")==0){
-				replacement = 2; /*****replacement policy is random == 3*********/
+				cache.replacement = 2; // replacement policy is random == 3
 			}else if(strcmp(argv[i], "LRU")==0){
-				replacement = 3; /*****replacement policy is LeastRecentlyUsed == 5****/
+				cache.replacement = 3; // replacement policy is LeastRecentlyUsed == 5
 			}else{
 				printf("Invalid replacement policy(RR, RND, LRU): EXITING\n");
 				return -6;
@@ -80,14 +79,68 @@ int main(int argc, char *argv[]){
 			return -7;
 		}
 	}
-
+	configureCache();
+	printCache(); // For visualization, to be deleted later on
 	printHeader(argv, argc, infilename);
 	printCalculatedValues();
 	printCacheHitRate();
 	parseTrace(infp);
+	freeCache();
 
 	fclose(infp);
 	return 1;
+}
+
+/*
+ * Configure cache structure based on total indices and associativity
+ */
+void configureCache()
+{
+	// Calculate additional cache values
+	cache.totalBlocks = calculateTotalBlocks();
+        cache.indexSize = calculateIndexSize(cache.totalBlocks);
+        cache.totalIndices = calculateTotalIndices(cache.indexSize);
+        cache.tagSize = calculateTagSize(cache.indexSize);
+	
+	// Allocate cache memory
+	cache.indices = malloc(sizeof(Index) * cache.totalIndices);
+        int i;
+        for (i = 0; i < cache.totalIndices; i++) {
+                cache.indices[i].blocks = malloc(sizeof(Block) * cache.associativity);
+                int j;
+                for (j = 0; j < cache.associativity; j++) {
+                        cache.indices[i].blocks[j].valid = 0;
+                }
+        }
+}
+
+/*
+ * Displays cache structure using print statements (not necessary, but can be useful in debugging)
+ */ 
+void printCache()
+{
+	printf("\n***TOP OF CACHE***\n\n");
+
+	int i, j;
+	for (i = 0; i < cache.totalIndices; i++) {
+		for (j = 0; j < cache.associativity; j++) {
+			printf("%d ", cache.indices[i].blocks[j].valid);
+		}
+		printf("\n");
+	}
+	printf("\n***BOTTOM OF CACHE***\n\n");
+}
+
+/*
+ * Free all malloc'd cache memory
+ */ 
+void freeCache()
+{
+	int i;
+	for (i = 0; i < cache.totalIndices ; i++) {
+                free(cache.indices[i].blocks);
+        }
+	free(cache.indices);
 }
 
 /*
@@ -95,55 +148,55 @@ int main(int argc, char *argv[]){
  */
 void parseTrace(FILE * traceFile)
 {
-    char buf[1000];
-    int eAddr, eSize, wAddr, rAddr;
-    int addrs[20];
-    int sizes[20];
-    int cnt = 0;
+    	char buf[1000];
+    	int eAddr, eSize, wAddr, rAddr;
+    	int addrs[20];
+    	int sizes[20];
+    	int cnt = 0;
 
-    // read to eof
-    while (fgets(buf, 999, traceFile) != NULL)
-    {
-        // not EIP line
-        if (buf[0] == 'E') {
-            parseEipLine(buf, &eAddr, &eSize);
-            // store first 20 addresses and size
-            if (cnt < 20) {
-                addrs[cnt] = eAddr;
-                sizes[cnt] = eSize;
-                cnt++;
-            }
-        }
-        else if (buf[0] == 'd') {
-            parseDataLine(buf, &wAddr, &rAddr);
-            //printTraceData(eAddr, eSize, wAddr, rAddr);
-        }
-    }
+    	// read to eof
+    	while (fgets(buf, 999, traceFile) != NULL)
+    	{
+        	// not EIP line
+        	if (buf[0] == 'E') {
+            		parseEipLine(buf, &eAddr, &eSize);
+            		// store first 20 addresses and size
+            		if (cnt < 20) {
+                		addrs[cnt] = eAddr;
+                		sizes[cnt] = eSize;
+                		cnt++;
+            		}
+        	}
+        	else if (buf[0] == 'd') {
+            		parseDataLine(buf, &wAddr, &rAddr);
+           		// printTraceData(eAddr, eSize, wAddr, rAddr);
+        	}
+    	}
 
-    int i;
-    // print the rest in a list
-    for (i = 0; i < 20; i++)
-    {
-        printf("0x%08x: (%d)\n", addrs[i], sizes[i]);
-    }
+    	int i;
+    	// print the rest in a list
+    	for (i = 0; i < 20; i++)
+    	{
+        	printf("0x%08x: (%d)\n", addrs[i], sizes[i]);
+    	}
 }
 
 /*
  * Print the trace data using the given params.
  */
 void printTraceData(int eAddr, int eSize, int wAddr, int rAddr) {
-    printf("Address = 0x%08x, length = %d. ", eAddr, eSize);
+    	printf("Address = 0x%08x, length = %d. ", eAddr, eSize);
 
-    // read or write affects output
-    if (wAddr == 0 && rAddr == 0)
-        printf("No data writes/reads occurred.\n\n");
-    else if (wAddr == 0)
-        printf("No data writes occurred. Data read at 0x%08x, length = 4 bytes\n\n", rAddr);
-    else if (rAddr == 0)
-        printf("Data write at 0x%08x, length = 4 bytes. No data reads occured\n\n", wAddr);
-    else
-        printf("Data write is at 0x%08x, length = 4 bytes, data read at 0x%08x, length = 4 bytes\n\n",
-            wAddr, rAddr);
+    	// read or write affects output
+    	if (wAddr == 0 && rAddr == 0)
+        	printf("No data writes/reads occurred.\n\n");
+    	else if (wAddr == 0)
+        	printf("No data writes occurred. Data read at 0x%08x, length = 4 bytes\n\n", rAddr);
+    	else if (rAddr == 0)
+        	printf("Data write at 0x%08x, length = 4 bytes. No data reads occured\n\n", wAddr);
+    	else
+        	printf("Data write is at 0x%08x, length = 4 bytes, data read at 0x%08x, length = 4 bytes\n\n",
+            		wAddr, rAddr);
 }
 
 /*
@@ -151,12 +204,12 @@ void printTraceData(int eAddr, int eSize, int wAddr, int rAddr) {
  */
 void parseEipLine(char * buf, int *addr, int *size)
 {
-    if (sscanf(buf, "EIP (%d): %x", size, addr) != 2)
-    {
-        perror("Invalid EIP line. Unable to read all bytes.");
-        exit(-1);
-    }
-    return;
+    	if (sscanf(buf, "EIP (%d): %x", size, addr) != 2)
+    	{
+        	perror("Invalid EIP line. Unable to read all bytes.");
+        	exit(-1);
+    	}
+	return;
 }
 
 /*
@@ -164,15 +217,15 @@ void parseEipLine(char * buf, int *addr, int *size)
  */
 void parseDataLine(char *buf, int *writeAddr, int *readAddr)
 {
-    *readAddr = -1;
-    char dataDst[9];
-    if (sscanf(buf, "dstM: %x %8s srcM: %x", writeAddr, dataDst, readAddr) < 3
-        && *readAddr == -1)
-    {
-        perror("Invalid data line. Unable to read dest and source addresses.");
-        exit(-1);
-    }
-    return;
+    	*readAddr = -1;
+    	char dataDst[9];
+    	if (sscanf(buf, "dstM: %x %8s srcM: %x", writeAddr, dataDst, readAddr) < 3
+        	&& *readAddr == -1)
+    	{
+        	perror("Invalid data line. Unable to read dest and source addresses.");
+        	exit(-1);
+    	}
+    	return;
 }
 
 /*
@@ -193,10 +246,10 @@ void printHeader(char *argv[], int argc, char *filename){
 
     	// parsed info
 	printf("Trace File: %s\n", argv[2]);
-	printf("Cache Size: %d KB\n", cachesize);
-	printf("Block Size: %d bytes\n", blocksize);
-	printf("Associativity: %d\n", associativity);
-	printf("Policy: %s\n", getPolicyString(replacement));
+	printf("Cache Size: %d KB\n", cache.cachesize);
+	printf("Block Size: %d bytes\n", cache.blocksize);
+	printf("Associativity: %d\n", cache.associativity);
+	printf("Policy: %s\n", getPolicyString(cache.replacement));
 	printf("\n");
 }
 
@@ -218,55 +271,51 @@ char *getPolicyString(int replacement){
  * Calculate some values based off of the given parameters
  */
 void printCalculatedValues(){
-	int totalBlocks = calculateTotalBlocks(cachesize, blocksize);
-	int indexSize = calculateIndexSize(totalBlocks, associativity);
-	int totalIndices = calculateTotalIndices(indexSize);
-	int tagSize = calculateTagSize(blocksize, indexSize);
-	if(totalBlocks < 1024)
+	if(cache.totalBlocks < 1024)
 	{
-		printf("Total # Blocks: %d (2^%.0lf)\n", totalBlocks, (log(totalBlocks)/(log(2))));
+		printf("Total # Blocks: %d (2^%.0lf)\n", cache.totalBlocks, (log(cache.totalBlocks)/(log(2))));
 	}else
 	{
-		printf("Total # Blocks: %d KB (2^%.0lf)\n", totalBlocks / 1024, log(totalBlocks/1024)/log(2)+10); 
+		printf("Total # Blocks: %d KB (2^%.0lf)\n", cache.totalBlocks / 1024, log(cache.totalBlocks/1024)/log(2)+10); 
 	}
-	printf("Tag Size: %d bits\n", tagSize);
-	if(indexSize < 10){
-		printf("Index Size: %d bits, Total Indices: %d\n", indexSize, (int)pow(2,indexSize));
+	printf("Tag Size: %d bits\n", cache.tagSize);
+	if (cache.indexSize < 10){
+		printf("Index Size: %d bits, Total Indices: %d\n", cache.indexSize, cache.totalIndices);
 	}else{
-		printf("Index Size: %d bits, Total Indices: %d K\n", indexSize, totalIndices);
+		printf("Index Size: %d bits, Total Indices: %d K\n", cache.indexSize, cache.totalIndices / 1024);
 	}
-	printf("Overhead Memory Size: %d bytes\n", calculateOverheadMemorySize(tagSize, totalBlocks));
-    	printf("Implementation Memory Size: %d bytes\n", cachesize * 1024 + calculateOverheadMemorySize(tagSize, totalBlocks));
+	printf("Overhead Memory Size: %d bytes\n", calculateOverheadMemorySize(cache.tagSize, cache.totalBlocks));
+    	printf("Implementation Memory Size: %d bytes\n", cache.cachesize * 1024 + calculateOverheadMemorySize(cache.tagSize, cache.totalBlocks));
 	printf("\n");
 }
 
 /*
  * Calculate the total number of blocks in the cache
  */
-int calculateTotalBlocks(int cachesize, int blocksize){
-	return cachesize * 1024 / blocksize;
+int calculateTotalBlocks(){
+	return cache.cachesize * 1024 / cache.blocksize;
 }
 
 /* 
  * Calculate the size of the tag
  */
-int calculateTagSize(int blocksize, int indexSize){
-	int blockBits = log(blocksize) / log(2);
+int calculateTagSize(int indexSize){
+	int blockBits = log(cache.blocksize) / log(2);
 	return ADDRESS_SPACE - blockBits - indexSize;
 }
 
 /* 
  * Calculate the size of the index
  */
-int calculateIndexSize(int totalBlocks, int associativity){
-	return log(totalBlocks / associativity) / log(2);
+int calculateIndexSize(int totalBlocks){
+	return log(totalBlocks / cache.associativity) / log(2);
 }
 
 /* 
  * Calculate the total number of indices
  */
 int calculateTotalIndices(int indexSize){
-	return pow(2, indexSize) / 1024;
+	return pow(2, indexSize); // / 1024;
 }
 
 /* 

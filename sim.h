@@ -1,13 +1,42 @@
+/*** CACHE AND COMPONENT STRUCTURES ***/
+
+typedef struct {
+        int valid;
+        int tag;
+} Block;
+
+typedef struct {
+        int replacementTag;
+        Block *blocks;
+} Index;
+
+typedef struct {
+        int cachesize;
+        int blocksize;
+        int associativity;
+        int replacement;
+        int totalBlocks;
+	int indexSize;
+	int totalIndices;
+	int tagSize;
+	Index *indices;
+} Cache;
+
+/*** FUNCTION PROTOTYPES ***/
+
 void printHeader(char *argv[], int argc, char *infilename);
-char *getPolicyString(int replacement);
 void printCalculatedValues();
-int calculateTotalBlocks(int cachesize, int blocksize);
-int calculateTagSize(int blocksize, int indexSize);
-int calculateIndexSize(int totalBlocks, int associativity);
-int calculateTotalIndices(int indexSize);
-int calculateOverheadMemorySize(int tagSize, int totalBlocks);
 void printCacheHitRate();
-void parseTrace(FILE * traceFile);
 void printTraceData(int eAddr, int eSize, int wAddr, int rAddr);
+void parseTrace(FILE * traceFile);
 void parseDataLine(char *buf, int *writeAddr, int *readAddr);
 void parseEipLine(char * buf, int *addr, int *size);
+int calculateTotalBlocks();
+int calculateTagSize(int indexSize);
+int calculateIndexSize(int totalBlocks);
+int calculateTotalIndices(int indexSize);
+int calculateOverheadMemorySize(int tagSize, int totalBlocks);
+void configureCache(); 
+void printCache();
+void freeCache();
+char *getPolicyString(int replacement);
