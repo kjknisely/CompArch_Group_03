@@ -80,11 +80,12 @@ int main(int argc, char *argv[]){
 		}
 	}
 	configureCache();
-	printCache(); // For visualization, to be deleted later on
+	// printCache(); // For visualization, to be deleted later on
 	printHeader(argv, argc, infilename);
 	printCalculatedValues();
 	printCacheHitRate();
 	parseTrace(infp);
+	printCache();
 	freeCache();
 
 	fclose(infp);
@@ -126,6 +127,12 @@ void printCache()
 	for (i = 0; i < cache.totalIndices; i++) {
 		for (j = 0; j < cache.associativity; j++) {
 			printf("%d ", cache.indices[i].blocks[j].valid);
+			if (cache.indices[i].blocks[j].valid == 1) {
+				printf("%-5x ", cache.indices[i].blocks[j].tag);
+			}
+			else {
+				printf("%-5s ", "-----");
+			}
 		}
 		printf("\n");
 	}
@@ -173,6 +180,8 @@ void parseTrace(FILE * traceFile)
 				offset = eAddr << (cache.tagSize + cache.indexSize);
                                 offset = offset >> (cache.tagSize + cache.indexSize);
                                 printf("\tOffset: %x\n", offset);
+				cache.indices[index].blocks[offset].tag = tag;
+				cache.indices[index].blocks[offset].valid = 1;
 				cnt++;
 				//checkcachetable()
             		}
@@ -190,6 +199,8 @@ void parseTrace(FILE * traceFile)
                                 offset = eAddr << (cache.tagSize + cache.indexSize);
                                 offset = offset >> (cache.tagSize + cache.indexSize);
                                 printf("\tOffset: %x\n", offset);
+				cache.indices[index].blocks[offset].tag = tag;
+                                cache.indices[index].blocks[offset].valid = 1;
 				//checkcachetable()
 			}
 			if (rAddr !=0){
@@ -202,6 +213,8 @@ void parseTrace(FILE * traceFile)
                                 offset = eAddr << (cache.tagSize + cache.indexSize);
                                 offset = offset >> (cache.tagSize + cache.indexSize);
                                 printf("\tOffset: %x\n", offset);
+				cache.indices[index].blocks[offset].tag = tag;
+                                cache.indices[index].blocks[offset].valid = 1;
 				//checkcachetable()
 			}
         	}

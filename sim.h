@@ -2,7 +2,7 @@
 
 typedef struct {
         int valid;
-        int tag;
+        unsigned int tag;
 } Block;
 
 typedef struct {
