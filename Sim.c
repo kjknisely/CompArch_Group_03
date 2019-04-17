@@ -373,7 +373,7 @@ void printCacheHitRate(){
 }
 
 void checkCacheTable(int tag, int index, int offset){
-	
+		//if( rplacement == Lru){int  replaceblock = replacelru(); block[index].block[<-REPLACEBLOCK] = new tag
 	return;
 }
 
