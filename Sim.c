@@ -12,6 +12,7 @@ Sabrina Mosher
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <time.h>
 #include "sim.h"
 
 static int ADDRESS_SPACE = 32; // 32-bit address space
@@ -19,6 +20,7 @@ static int ADDRESS_SPACE = 32; // 32-bit address space
 Cache cache;
 
 int main(int argc, char *argv[]){
+	srand(time(NULL));
 	int i;
 	FILE *infp = NULL;
 	char *infilename=NULL;
@@ -65,11 +67,11 @@ int main(int argc, char *argv[]){
 		}else if(strcmp(argv[i], "-r")==0){
 			i++;
 			if(strcmp(argv[i], "RR")==0){
-				cache.replacement = 1; // replacement policy round robin == 1
+				cache.replacement = 1;
 			}else if(strcmp(argv[i],"RND")==0){
-				cache.replacement = 2; // replacement policy is random == 3
+				cache.replacement = 2;
 			}else if(strcmp(argv[i], "LRU")==0){
-				cache.replacement = 3; // replacement policy is LeastRecentlyUsed == 5
+				cache.replacement = 3; 
 			}else{
 				printf("Invalid replacement policy(RR, RND, LRU): EXITING\n");
 				return -6;
@@ -80,12 +82,11 @@ int main(int argc, char *argv[]){
 		}
 	}
 	configureCache();
-	// printCache(); // For visualization, to be deleted later on
+	parseTrace(infp);
+	printCache();
 	printHeader(argv, argc, infilename);
 	printCalculatedValues();
 	printCacheHitRate();
-	parseTrace(infp);
-	printCache();
 	freeCache();
 
 	fclose(infp);
@@ -102,13 +103,14 @@ void configureCache()
         cache.indexSize = calculateIndexSize(cache.totalBlocks);
         cache.totalIndices = calculateTotalIndices(cache.indexSize);
         cache.tagSize = calculateTagSize(cache.indexSize);
-				cache.offsetSize = (log(cache.blocksize)/(log(2)));
+	cache.offsetSize = (log(cache.blocksize)/(log(2)));
 	
 	// Allocate cache memory
 	cache.indices = malloc(sizeof(Index) * cache.totalIndices);
         int i;
         for (i = 0; i < cache.totalIndices; i++) {
                 cache.indices[i].blocks = malloc(sizeof(Block) * cache.associativity);
+		cache.indices[i].replacementBlockIndex = 0;
                 int j;
                 for (j = 0; j < cache.associativity; j++) {
                         cache.indices[i].blocks[j].valid = 0;
@@ -128,10 +130,10 @@ void printCache()
 		for (j = 0; j < cache.associativity; j++) {
 			printf("%d ", cache.indices[i].blocks[j].valid);
 			if (cache.indices[i].blocks[j].valid == 1) {
-				printf("%-5x ", cache.indices[i].blocks[j].tag);
+				printf("%-8x ", cache.indices[i].blocks[j].tag);
 			}
 			else {
-				printf("%-5s ", "-----");
+				printf("%-8s ", "--------");
 			}
 		}
 		printf("\n");
@@ -154,70 +156,151 @@ void freeCache()
 /*
  * Parse the input trace file
  */
-void parseTrace(FILE * traceFile)
-{
+void parseTrace(FILE * traceFile) {
 	char buf[1000];
 	int eAddr, eSize, wAddr, rAddr;
-  int cnt = 0;
-	unsigned int offset;
-	unsigned int index;
-	unsigned int tag;
 
     	// read to eof
-  while (fgets(buf, 999, traceFile) != NULL)
-  {
+  	while (fgets(buf, 999, traceFile) != NULL)
+  	{
         	// not EIP line
 		if (buf[0] == 'E') {
-    	parseEipLine(buf, &eAddr, &eSize);
-//			printf("(%x):", eAddr);
-      tag = eAddr >> (cache.indexSize + cache.offsetSize);
-//    printf("\tTag: %x", tag);
-			index = eAddr << cache.tagSize; 
-			index = index >> (cache.tagSize + cache.offsetSize);
-//		printf("\tIndex: %x", index);
-//     printf("\tOffset: %x\n", offset);
-			cnt++;
-			checkCacheTable(tag,index,offset);
-      }
-      else if (buf[0] == 'd') {
-      	parseDataLine(buf, &wAddr, &rAddr);
-      	// printTraceData(eAddr, eSize, wAddr, rAddr);
-				if (wAddr != 0){
-//				printf("(%x):", eAddr);
-          tag = eAddr >> (cache.indexSize + cache.offsetSize);
-//  	       printf("\tTag: %x", tag);
-          index = eAddr << cache.tagSize; 
-          index = index >> (cache.tagSize + cache.offsetSize);
-//	        printf("\tIndex: %x", index);
-          offset = eAddr << (cache.tagSize + cache.indexSize);
-          offset = offset >> (cache.tagSize + cache.indexSize);
-//          printf("\tOffset: %x\n", offset);
-					checkCacheTable(tag,index,offset);
+    			parseEipLine(buf, &eAddr, &eSize);
+			performCacheOperation(eAddr);
+		}
+      		else if (buf[0] == 'd') {
+      			parseDataLine(buf, &wAddr, &rAddr);
+      			// printTraceData(eAddr, eSize, wAddr, rAddr);
+			if (wAddr != 0){
+				performCacheOperation(wAddr);
 			}
 			if (rAddr !=0){
-//				printf("(%x):", eAddr);
-      	tag = eAddr >> (cache.indexSize + cache.offsetSize);
- //   	  printf("\tTag: %x", tag);
-        index = eAddr << cache.tagSize; 
-        index = index >> (cache.tagSize + cache.offsetSize);
-//        printf("\tIndex: %x", index);
-        offset = eAddr << (cache.tagSize + cache.indexSize);
-        offset = offset >> (cache.tagSize + cache.indexSize);
-//        printf("\tOffset: %x\n", offset);
-				checkCacheTable(tag,index,offset);
+				performCacheOperation(rAddr);
 			}
         	}
     	}
-
-    	// int i;
-    	// print the rest in a list
-	/*    	
-	for (i = 0; i < 20; i++)
-    	{
-        	printf("0x%08x: (%d)\n", addrs[i], sizes[i]);
-    	}
-	*/
 }
+
+/*
+ * Parse an EIP line
+ */
+void parseEipLine(char * buf, int *addr, int *size)
+{
+        if (sscanf(buf, "EIP (%d): %x", size, addr) != 2)
+        {
+                perror("Invalid EIP line. Unable to read all bytes.");
+                exit(-1);
+        }
+        return;
+}
+
+/*
+ * Parse a data line
+ */
+void parseDataLine(char *buf, int *writeAddr, int *readAddr)
+{
+        *readAddr = -1;
+        char dataDst[9];
+        if (sscanf(buf, "dstM: %x %8s srcM: %x", writeAddr, dataDst, readAddr) < 3
+                && *readAddr == -1)
+        {
+                perror("Invalid data line. Unable to read dest and source addresses.");
+                exit(-1);
+        }
+        return;
+}
+
+/*
+ * Splits a given address into its separate components and calls helper function to access the cache
+ * based on tag and index values.
+ */
+void performCacheOperation(int addr) {
+	unsigned int tag = addr >> (cache.indexSize + cache.offsetSize);
+	unsigned int index = addr << cache.tagSize; 
+	index = index >> (cache.tagSize + cache.offsetSize);
+	unsigned int offset = addr << (cache.tagSize + cache.indexSize);
+        offset = offset >> (cache.tagSize + cache.indexSize);
+	// printf("(%x):\tTag: %x\tIndex: %x\tOffset: %x\n", addr, tag, index, offset);
+	performCacheAccess(tag, index);
+}
+
+/*
+ * Accesses the access and determines whether a hit or miss occurs and whether or not a replacement
+ * is necessary. Updates missCount and accessCount accordingly.
+ */
+void performCacheAccess(unsigned int tag, unsigned int index){
+        if (isHit(index, tag) == 1) {
+                // TODO: Update LRU when a hit occurs and replacement policy is LRU
+        } else {
+		cache.missCount++;
+                // Place tag in first empty block if any exist
+                int i;
+                for (i = 0; i < cache.associativity; i++) {
+                        if (cache.indices[index].blocks[i].valid == 0) {
+                                // update block to valid and uddate block tag
+                                cache.indices[index].blocks[i].tag = tag;
+                                cache.indices[index].blocks[i].valid = 1;
+                                return;
+                        }
+                }
+                // No empty blocks exist, replace based on replacement policy
+                replace(index, tag); // set nextReplacementBlock tag to tag
+        }
+	cache.accessCount++;
+        return;
+}
+
+/*
+ * Determines whether or not a hit occurred
+ */
+int isHit(unsigned int index, unsigned int tag) {
+        int i;
+        for (i = 0; i < cache.associativity; i++) {
+                if (cache.indices[index].blocks[i].valid == 1
+                        && cache.indices[index].blocks[i].tag == tag) {
+                        return 1;
+                }
+        }
+        return 0;
+}
+
+/*
+ * Determine which replacement function to call based on the cache's replacement policy
+ */
+void replace(unsigned int index, unsigned int tag) {
+        if (cache.replacement == 1) {
+                replaceRR(index, tag);
+        } else if (cache.replacement == 2) {
+                replaceRandom(index, tag);
+        } else {
+                replaceLRU(index, tag);
+        }
+}
+
+/*
+ * Replace block @ replacementBlockIndex and update replacementBlockIndex to next index sequentially
+ */
+void replaceRR(unsigned int index, unsigned int tag) {
+        int replacementBlockIndex = cache.indices[index].replacementBlockIndex;
+        cache.indices[index].blocks[replacementBlockIndex].tag = tag;
+        cache.indices[index].blocks[replacementBlockIndex].valid = 1;
+        cache.indices[index].replacementBlockIndex = (cache.indices[index].replacementBlockIndex + 1) % cache.associativity;
+}
+
+/*
+ * Replace block @ random index between 0 and cache.associativity
+ */
+void replaceRandom(unsigned int index, unsigned int tag) {
+        int i = rand() % cache.associativity;
+        int replacementBlockIndex = i; // rand() % cache.associativity;
+        cache.indices[index].blocks[replacementBlockIndex].tag = tag;
+        cache.indices[index].blocks[replacementBlockIndex].valid = 1;
+}
+
+void replaceLRU(unsigned int index, unsigned int tag) {
+        // TODO: Implement
+}
+
 
 /*
  * Print the trace data using the given params.
@@ -235,35 +318,6 @@ void printTraceData(int eAddr, int eSize, int wAddr, int rAddr) {
     	else
         	printf("Data write is at 0x%08x, length = 4 bytes, data read at 0x%08x, length = 4 bytes\n\n",
             		wAddr, rAddr);
-}
-
-/*
- * Parse an EIP line
- */
-void parseEipLine(char * buf, int *addr, int *size)
-{
-    	if (sscanf(buf, "EIP (%d): %x", size, addr) != 2)
-    	{
-        	perror("Invalid EIP line. Unable to read all bytes.");
-        	exit(-1);
-    	}
-	return;
-}
-
-/*
- * Parse a data line
- */
-void parseDataLine(char *buf, int *writeAddr, int *readAddr)
-{
-    	*readAddr = -1;
-    	char dataDst[9];
-    	if (sscanf(buf, "dstM: %x %8s srcM: %x", writeAddr, dataDst, readAddr) < 3
-        	&& *readAddr == -1)
-    	{
-        	perror("Invalid data line. Unable to read dest and source addresses.");
-        	exit(-1);
-    	}
-    	return;
 }
 
 /*
@@ -367,13 +421,9 @@ int calculateOverheadMemorySize(int tagSize, int totalBlocks){
  * Print out the hit rate
  */
 void printCacheHitRate(){
-	// TODO: Actually calulate and report cache hit rate for future milestones
-	printf("Cache Hit Rate: __%%\n");
-	printf("\n");
+	if (cache.accessCount == 0) {
+		perror("Unable to calculate hit rate: Access count is 0.");
+		return;
+	}
+	printf("Cache Hit Rate: %.4f %% (Misses: %.0f; Accesses: %.0f)\n\n", cache.missCount/cache.accessCount, cache.missCount, cache.accessCount);
 }
-
-void checkCacheTable(int tag, int index, int offset){
-		//if( rplacement == Lru){int  replaceblock = replacelru(); block[index].block[<-REPLACEBLOCK] = new tag
-	return;
-}
-

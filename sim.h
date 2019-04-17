@@ -6,7 +6,7 @@ typedef struct {
 } Block;
 
 typedef struct {
-        int replacementTag;
+        int replacementBlockIndex;
         Block *blocks;
 } Index;
 
@@ -21,6 +21,8 @@ typedef struct {
 	int tagSize;
 	int offsetSize;
 	Index *indices;
+	double missCount;
+	double accessCount;
 } Cache;
 
 /*** FUNCTION PROTOTYPES ***/
@@ -41,5 +43,10 @@ void configureCache();
 void printCache();
 void freeCache();
 char *getPolicyString(int replacement);
-void checkCacheTable(int tag, int index, int offset);
-
+void performCacheOperation(int addr);
+void performCacheAccess(unsigned int tag, unsigned int index);
+int isHit(unsigned int index, unsigned int tag);
+void replace(unsigned int index, unsigned int tag);
+void replaceRR(unsigned int index, unsigned int tag);
+void replaceRandom(unsigned int index, unsigned int tag);
+void replaceLRU(unsigned int index, unsigned int tag);
