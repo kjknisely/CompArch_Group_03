@@ -156,66 +156,55 @@ void freeCache()
  */
 void parseTrace(FILE * traceFile)
 {
-    	char buf[1000];
-    	int eAddr, eSize, wAddr, rAddr;
-    	int cnt = 0;
+	char buf[1000];
+	int eAddr, eSize, wAddr, rAddr;
+  int cnt = 0;
 	unsigned int offset;
 	unsigned int index;
 	unsigned int tag;
 
     	// read to eof
-    	while (fgets(buf, 999, traceFile) != NULL)
-    	{
+  while (fgets(buf, 999, traceFile) != NULL)
+  {
         	// not EIP line
-        	if (buf[0] == 'E') {
-            		parseEipLine(buf, &eAddr, &eSize);
-            		// store first 20 addresses and size
-            		if (cnt < 20) {	
-				printf("(%x):", eAddr);
-                		tag = eAddr >> (cache.indexSize + cache.offsetSize);
-                                printf("\tTag: %x", tag);
-				index = eAddr << cache.tagSize; 
-				index = index >> (cache.tagSize + cache.offsetSize);
-				printf("\tIndex: %x", index);
-				offset = eAddr << (cache.tagSize + cache.indexSize);
-                                offset = offset >> (cache.tagSize + cache.indexSize);
-                                printf("\tOffset: %x\n", offset);
-				cache.indices[index].blocks[offset].tag = tag;
-				cache.indices[index].blocks[offset].valid = 1;
-				cnt++;
-				//checkcachetable()
-            		}
-        	}
-        	else if (buf[0] == 'd') {
-            		parseDataLine(buf, &wAddr, &rAddr);
-           		// printTraceData(eAddr, eSize, wAddr, rAddr);
-			if (wAddr != 0){
-				printf("(%x):", eAddr);
-                                tag = eAddr >> (cache.indexSize + cache.offsetSize);
-                                printf("\tTag: %x", tag);
-                                index = eAddr << cache.tagSize; 
-                                index = index >> (cache.tagSize + cache.offsetSize);
-                                printf("\tIndex: %x", index);
-                                offset = eAddr << (cache.tagSize + cache.indexSize);
-                                offset = offset >> (cache.tagSize + cache.indexSize);
-                                printf("\tOffset: %x\n", offset);
-				cache.indices[index].blocks[offset].tag = tag;
-                                cache.indices[index].blocks[offset].valid = 1;
-				//checkcachetable()
+		if (buf[0] == 'E') {
+    	parseEipLine(buf, &eAddr, &eSize);
+//			printf("(%x):", eAddr);
+      tag = eAddr >> (cache.indexSize + cache.offsetSize);
+//    printf("\tTag: %x", tag);
+			index = eAddr << cache.tagSize; 
+			index = index >> (cache.tagSize + cache.offsetSize);
+//		printf("\tIndex: %x", index);
+//     printf("\tOffset: %x\n", offset);
+			cnt++;
+			checkCacheTable(tag,index,offset);
+      }
+      else if (buf[0] == 'd') {
+      	parseDataLine(buf, &wAddr, &rAddr);
+      	// printTraceData(eAddr, eSize, wAddr, rAddr);
+				if (wAddr != 0){
+//				printf("(%x):", eAddr);
+          tag = eAddr >> (cache.indexSize + cache.offsetSize);
+//  	       printf("\tTag: %x", tag);
+          index = eAddr << cache.tagSize; 
+          index = index >> (cache.tagSize + cache.offsetSize);
+//	        printf("\tIndex: %x", index);
+          offset = eAddr << (cache.tagSize + cache.indexSize);
+          offset = offset >> (cache.tagSize + cache.indexSize);
+//          printf("\tOffset: %x\n", offset);
+					checkCacheTable(tag,index,offset);
 			}
 			if (rAddr !=0){
-				printf("(%x):", eAddr);
-                                tag = eAddr >> (cache.indexSize + cache.offsetSize);
-                                printf("\tTag: %x", tag);
-                                index = eAddr << cache.tagSize; 
-                                index = index >> (cache.tagSize + cache.offsetSize);
-                                printf("\tIndex: %x", index);
-                                offset = eAddr << (cache.tagSize + cache.indexSize);
-                                offset = offset >> (cache.tagSize + cache.indexSize);
-                                printf("\tOffset: %x\n", offset);
-				cache.indices[index].blocks[offset].tag = tag;
-                                cache.indices[index].blocks[offset].valid = 1;
-				//checkcachetable()
+//				printf("(%x):", eAddr);
+      	tag = eAddr >> (cache.indexSize + cache.offsetSize);
+ //   	  printf("\tTag: %x", tag);
+        index = eAddr << cache.tagSize; 
+        index = index >> (cache.tagSize + cache.offsetSize);
+//        printf("\tIndex: %x", index);
+        offset = eAddr << (cache.tagSize + cache.indexSize);
+        offset = offset >> (cache.tagSize + cache.indexSize);
+//        printf("\tOffset: %x\n", offset);
+				checkCacheTable(tag,index,offset);
 			}
         	}
     	}
@@ -382,3 +371,9 @@ void printCacheHitRate(){
 	printf("Cache Hit Rate: __%%\n");
 	printf("\n");
 }
+
+void checkCacheTable(int tag, int index, int offset){
+	
+	return;
+}
+

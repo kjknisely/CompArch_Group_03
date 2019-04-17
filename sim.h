@@ -41,3 +41,5 @@ void configureCache();
 void printCache();
 void freeCache();
 char *getPolicyString(int replacement);
+void checkCacheTable(int tag, int index, int offset);
+
