@@ -1,0 +1,210 @@
+
+/*Round Robin Replacement 4 way associativity 64B block*/
+
+/*********16KB size**********/
+Cmd Line:Sim.exe -f Trace1.trc -s 16 -b 64 -a 4 -r RR 
+Trace File: Trace1.trc
+Cache Size: 16 KB
+Block Size: 64 bytes
+Associativity: 4
+Policy: RR
+
+Total # Blocks: 256 (2^8)
+Tag Size: 20 bits
+Index Size: 6 bits, Total Indices: 64
+Overhead Memory Size: 672 bytes
+Implementation Memory Size: 17056 bytes
+
+Total Cache Accesses: 37921
+Cache Hits: 36491
+Cache Misses: 1430
+Compulsory Cache Hits: 256
+Conflict Hits: 1174
+Cache Miss Rate: 3.7710 %
+
+/*******64KB size*********/
+Cmd Line:Sim.exe -f Trace1.trc -s 64 -b 64 -a 4 -r RR 
+Trace File: Trace1.trc
+Cache Size: 64 KB
+Block Size: 64 bytes
+Associativity: 4
+Policy: RR
+
+Total # Blocks: 1 KB (2^10)
+Tag Size: 18 bits
+Index Size: 8 bits, Total Indices: 256
+Overhead Memory Size: 2432 bytes
+Implementation Memory Size: 67968 bytes
+
+Total Cache Accesses: 37921
+Cache Hits: 37217
+Cache Misses: 704
+Compulsory Cache Hits: 636
+Conflict Hits: 68
+Cache Miss Rate: 1.8565 %
+
+/******256KB 16Block******/
+Cmd Line:Sim.exe -f Trace1.trc -s 256 -b 16 -a 4 -r RR 
+Trace File: Trace1.trc
+Cache Size: 256 KB
+Block Size: 16 bytes
+Associativity: 4
+Policy: RR
+
+Total # Blocks: 16 KB (2^14)
+Tag Size: 16 bits
+Index Size: 12 bits, Total Indices: 4 K
+Overhead Memory Size: 34816 bytes
+Implementation Memory Size: 296960 bytes
+
+Total Cache Accesses: 40063
+Cache Hits: 38762
+Cache Misses: 1301
+Compulsory Cache Hits: 1296
+Conflict Hits: 5
+Cache Miss Rate: 3.2474 %
+
+
+/***********random replace *************hit count may be +- 40 but has diff rate between execs of same size/
+Cmd Line:Sim.exe -f Trace1.trc -s 32 -b 32 -a 4 -r RND 
+Trace File: Trace1.trc
+Cache Size: 32 KB
+Block Size: 32 bytes
+Associativity: 4
+Policy: RND
+
+Total # Blocks: 1 KB (2^10)
+Tag Size: 19 bits
+Index Size: 8 bits, Total Indices: 256
+Overhead Memory Size: 2560 bytes
+Implementation Memory Size: 35328 bytes
+
+Total Cache Accesses: 38524
+Cache Hits: 37544
+Cache Misses: 980
+Compulsory Cache Hits: 791
+Conflict Hits: 189
+Cache Miss Rate: 2.5439 %
+
+Cmd Line:Sim.exe -f Trace1.trc -s 32 -b 16 -a 8 -r RND 
+Trace File: Trace1.trc
+Cache Size: 32 KB
+Block Size: 16 bytes
+Associativity: 8
+Policy: RND
+
+Total # Blocks: 2 KB (2^11)
+Tag Size: 20 bits
+Index Size: 8 bits, Total Indices: 256
+Overhead Memory Size: 5376 bytes
+Implementation Memory Size: 38144 bytes
+
+Total Cache Accesses: 40063
+Cache Hits: 38761
+Cache Misses: 1302
+Compulsory Cache Hits: 1265
+Conflict Hits: 37
+Cache Miss Rate: 3.2499 %
+
+
+/******LRU**********/
+Cmd Line:Sim.exe -f Trace1.trc -s 32 -b 16 -a 2 -r LRU 
+Trace File: Trace1.trc
+Cache Size: 32 KB
+Block Size: 16 bytes
+Associativity: 2
+Policy: LRU
+
+Total # Blocks: 2 KB (2^11)
+Tag Size: 18 bits
+Index Size: 10 bits, Total Indices: 1 K
+Overhead Memory Size: 4864 bytes
+Implementation Memory Size: 37632 bytes
+
+Total Cache Accesses: 40063
+Cache Hits: 38677
+Cache Misses: 1386
+Compulsory Cache Hits: 1137
+Conflict Hits: 249
+Cache Miss Rate: 3.4596 %
+
+Cmd Line:Sim.exe -f Trace1.trc -s 16 -b 8 -a 4 -r LRU 
+Trace File: Trace1.trc
+Cache Size: 16 KB
+Block Size: 8 bytes
+Associativity: 4
+Policy: LRU
+
+Total # Blocks: 2 KB (2^11)
+Tag Size: 20 bits
+Index Size: 9 bits, Total Indices: 512
+Overhead Memory Size: 5376 bytes
+Implementation Memory Size: 21760 bytes
+
+Total Cache Accesses: 44077
+Cache Hits: 42147
+Cache Misses: 1930
+Compulsory Cache Hits: 1599
+Conflict Hits: 331
+Cache Miss Rate: 4.3787 %
+
+Cmd Line:Sim.exe -f Trace1.trc -s 1024 -b 8 -a 4 -r LRU 
+Trace File: Trace1.trc
+Cache Size: 1024 KB
+Block Size: 8 bytes
+Associativity: 4
+Policy: LRU
+
+Total # Blocks: 128 KB (2^17)
+Tag Size: 14 bits
+Index Size: 15 bits, Total Indices: 32 K
+Overhead Memory Size: 245760 bytes
+Implementation Memory Size: 1294336 bytes
+
+Total Cache Accesses: 44077
+Cache Hits: 42163
+Cache Misses: 1914
+Compulsory Cache Hits: 1909
+Conflict Hits: 5
+Cache Miss Rate: 4.3424 %
+
+Cmd Line:Sim.exe -f Trace1.trc -s 16 -b 8 -a 2 -r LRU 
+Trace File: Trace1.trc
+Cache Size: 16 KB
+Block Size: 8 bytes
+Associativity: 2
+Policy: LRU
+
+Total # Blocks: 2 KB (2^11)
+Tag Size: 19 bits
+Index Size: 10 bits, Total Indices: 1 K
+Overhead Memory Size: 5120 bytes
+Implementation Memory Size: 21504 bytes
+
+Total Cache Accesses: 44077
+Cache Hits: 41932
+Cache Misses: 2145
+Compulsory Cache Hits: 1485
+Conflict Hits: 660
+Cache Miss Rate: 4.8665 %
+
+Cmd Line:Sim.exe -f Trace1.trc -s 16 -b 16 -a 8 -r LRU 
+Trace File: Trace1.trc
+Cache Size: 16 KB
+Block Size: 16 bytes
+Associativity: 8
+Policy: LRU
+
+Total # Blocks: 1 KB (2^10)
+Tag Size: 21 bits
+Index Size: 7 bits, Total Indices: 128
+Overhead Memory Size: 2816 bytes
+Implementation Memory Size: 19200 bytes
+
+Total Cache Accesses: 40063
+Cache Hits: 38759
+Cache Misses: 1304
+Compulsory Cache Hits: 991
+Conflict Hits: 313
+Cache Miss Rate: 3.2549 %
+

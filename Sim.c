@@ -83,6 +83,7 @@ int main(int argc, char *argv[]){
         }
     }
 
+		srand(time(NULL));  
     configureCache();
     parseTrace(infp);
     // printCache();
@@ -268,7 +269,8 @@ void performCacheAccess(unsigned int tag, unsigned int index){
             }
         }
         // No empty blocks exist, replace based on replacement policy
-        replace(index, tag); // set nextReplacementBlock tag to tag
+//        fprintf(stderr, "index full  ");
+				replace(index, tag); // set nextReplacementBlock tag to tag
     }
 
     return;
@@ -298,10 +300,13 @@ int isHit(unsigned int index, unsigned int tag) {
 void replace(unsigned int index, unsigned int tag) {
     if (cache.replacement == 1) {
         replaceRR(index, tag);
+//				fprintf(stderr,"RR  ");
     } else if (cache.replacement == 2) {
         replaceRandom(index, tag);
+//				fprintf(stderr,"rnd  ");
     } else {
         replaceLRU(index, tag);
+//				fprintf(stderr,"lru  ");
     }
 }
 
@@ -319,7 +324,9 @@ void replaceRR(unsigned int index, unsigned int tag) {
  * Replace block @ random index between 0 and cache.associativity
  */
 void replaceRandom(unsigned int index, unsigned int tag) {
-    int i = rand() % cache.associativity;
+
+		int i = rand() % cache.associativity;
+//		fprintf(stderr, " %d  ", i);
     int replacementBlockIndex = i; // rand() % cache.associativity;
     cache.indices[index].blocks[replacementBlockIndex].tag = tag;
     cache.indices[index].blocks[replacementBlockIndex].valid = 1;
