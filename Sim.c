@@ -101,6 +101,9 @@ int main(int argc, char *argv[]){
 void configureCache()
 {
     // Calculate additional cache values
+    cache.compulsoryMisses = 0;
+    cache.missCount = 0;
+    cache.accessCount = 0;
     cache.totalBlocks = calculateTotalBlocks();
     cache.indexSize = calculateIndexSize();
     cache.totalIndices = calculateTotalIndices();
@@ -170,15 +173,15 @@ void parseTrace(FILE * traceFile) {
         // not EIP line
         if (buf[0] == 'E') {
             parseEipLine(buf, &eAddr, &eSize);
-            performCacheOperation(eAddr);
+            performCacheOperation(eAddr, eSize);
         }
           else if (buf[0] == 'd') {
               parseDataLine(buf, &wAddr, &rAddr);
             if (wAddr != 0){
-                performCacheOperation(wAddr);
+                performCacheOperation(wAddr, 4);
             }
             if (rAddr !=0){
-                performCacheOperation(rAddr);
+                performCacheOperation(rAddr, 4);
             }
         }
     }
@@ -217,15 +220,25 @@ void parseDataLine(char *buf, int *writeAddr, int *readAddr)
  * Splits a given address into its separate components and calls helper function to access the cache
  * based on tag and index values.
  */
-void performCacheOperation(int addr) {
+void performCacheOperation(int addr, int size) {
     unsigned int tag = addr >> (cache.indexSize + cache.offsetSize);
     unsigned int index = addr << cache.tagSize; 
     index = index >> (cache.tagSize + cache.offsetSize);
     unsigned int offset = addr << (cache.tagSize + cache.indexSize);
     offset = offset >> (cache.tagSize + cache.indexSize);
 
-    // printf("(%x):\tTag: %x\tIndex: %x\tOffset: %x\n", addr, tag, index, offset);
     performCacheAccess(tag, index);
+
+    if (offset + size <= cache.blocksize)
+        return;
+
+    addr += size-1;
+    unsigned int tag2 = addr >> (cache.indexSize + cache.offsetSize);
+    unsigned int index2 = addr << cache.tagSize;
+    index2 = index2 >> (cache.tagSize + cache.offsetSize);
+
+    // printf("(%x):\tTag: %x\tIndex: %x\tOffset: %x\n", addr, tag, index, offset);
+    performCacheAccess(tag2, index2);
 }
 
 /*
@@ -234,6 +247,7 @@ void performCacheOperation(int addr) {
  */
 void performCacheAccess(unsigned int tag, unsigned int index){
     CLOCK++;
+    cache.accessCount++;
     if (isHit(index, tag) == 0) {
         cache.missCount++;
 
@@ -249,6 +263,7 @@ void performCacheAccess(unsigned int tag, unsigned int index){
                 // update block to valid and uddate block tag
                 cache.indices[index].blocks[i].tag = tag;
                 cache.indices[index].blocks[i].valid = 1;
+                cache.compulsoryMisses++;
                 return;
             }
         }
@@ -256,8 +271,7 @@ void performCacheAccess(unsigned int tag, unsigned int index){
         replace(index, tag); // set nextReplacementBlock tag to tag
     }
 
-    cache.accessCount++;
-        return;
+    return;
 }
 
 /*
@@ -433,5 +447,10 @@ void printCacheHitRate(){
         perror("Unable to calculate hit rate: Access count is 0.");
         return;
     }
-    printf("Cache Miss Rate: %.4f %% (Misses: %.0f; Accesses: %.0f)\n\n", cache.missCount/cache.accessCount, cache.missCount, cache.accessCount);
+    printf("Total Cache Accesses: %.0f\n", cache.accessCount);
+    printf("Cache Hits: %.0f\n", cache.accessCount - cache.missCount);
+    printf("Cache Misses: %.0f\n", cache.missCount);
+    printf("Compulsory Cache Hits: %.0f\n", cache.compulsoryMisses);
+    printf("Conflict Hits: %.0f\n", cache.missCount - cache.compulsoryMisses);
+    printf("Cache Miss Rate: %.4f %%\n\n", 100 * cache.missCount/cache.accessCount);
 }

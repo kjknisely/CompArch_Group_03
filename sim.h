@@ -32,6 +32,7 @@ typedef struct {
 	int offsetSize;
 	Index *indices;
 	double missCount;
+    double compulsoryMisses;
 	double accessCount;
 } Cache;
 
@@ -51,7 +52,7 @@ void configureCache();
 void printCache();
 void freeCache();
 char *getPolicyString(int replacement);
-void performCacheOperation(int addr);
+void performCacheOperation(int addr, int size);
 void performCacheAccess(unsigned int tag, unsigned int index);
 int isHit(unsigned int index, unsigned int tag);
 void replace(unsigned int index, unsigned int tag);
