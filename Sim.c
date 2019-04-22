@@ -83,7 +83,6 @@ int main(int argc, char *argv[]){
         }
     }
 
-		srand(time(NULL));  
     configureCache();
     parseTrace(infp);
     // printCache();
@@ -230,16 +229,14 @@ void performCacheOperation(int addr, int size) {
 
     performCacheAccess(tag, index);
 
+
     if (offset + size <= cache.blocksize)
         return;
 
-    addr += size-1;
-    unsigned int tag2 = addr >> (cache.indexSize + cache.offsetSize);
-    unsigned int index2 = addr << cache.tagSize;
-    index2 = index2 >> (cache.tagSize + cache.offsetSize);
+    addr += cache.blocksize;
 
     // printf("(%x):\tTag: %x\tIndex: %x\tOffset: %x\n", addr, tag, index, offset);
-    performCacheAccess(tag2, index2);
+    performCacheOperation(addr, size-cache.blocksize);
 }
 
 /*
@@ -269,8 +266,7 @@ void performCacheAccess(unsigned int tag, unsigned int index){
             }
         }
         // No empty blocks exist, replace based on replacement policy
-//        fprintf(stderr, "index full  ");
-				replace(index, tag); // set nextReplacementBlock tag to tag
+        replace(index, tag); // set nextReplacementBlock tag to tag
     }
 
     return;
@@ -300,13 +296,10 @@ int isHit(unsigned int index, unsigned int tag) {
 void replace(unsigned int index, unsigned int tag) {
     if (cache.replacement == 1) {
         replaceRR(index, tag);
-//				fprintf(stderr,"RR  ");
     } else if (cache.replacement == 2) {
         replaceRandom(index, tag);
-//				fprintf(stderr,"rnd  ");
     } else {
         replaceLRU(index, tag);
-//				fprintf(stderr,"lru  ");
     }
 }
 
@@ -324,9 +317,7 @@ void replaceRR(unsigned int index, unsigned int tag) {
  * Replace block @ random index between 0 and cache.associativity
  */
 void replaceRandom(unsigned int index, unsigned int tag) {
-
-		int i = rand() % cache.associativity;
-//		fprintf(stderr, " %d  ", i);
+    int i = rand() % cache.associativity;
     int replacementBlockIndex = i; // rand() % cache.associativity;
     cache.indices[index].blocks[replacementBlockIndex].tag = tag;
     cache.indices[index].blocks[replacementBlockIndex].valid = 1;
@@ -457,7 +448,7 @@ void printCacheHitRate(){
     printf("Total Cache Accesses: %.0f\n", cache.accessCount);
     printf("Cache Hits: %.0f\n", cache.accessCount - cache.missCount);
     printf("Cache Misses: %.0f\n", cache.missCount);
-    printf("Compulsory Cache Hits: %.0f\n", cache.compulsoryMisses);
-    printf("Conflict Hits: %.0f\n", cache.missCount - cache.compulsoryMisses);
+    printf("Compulsory Cache Misses: %.0f\n", cache.compulsoryMisses);
+    printf("Conflict Misses: %.0f\n", cache.missCount - cache.compulsoryMisses);
     printf("Cache Miss Rate: %.4f %%\n\n", 100 * cache.missCount/cache.accessCount);
 }
