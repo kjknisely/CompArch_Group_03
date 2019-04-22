@@ -85,7 +85,7 @@ int main(int argc, char *argv[]){
 
     configureCache();
     parseTrace(infp);
-    //printCache();
+    // printCache();
     printHeader(argv, argc, infilename);
     printCalculatedValues();
     printCacheHitRate();
@@ -322,7 +322,7 @@ void replaceLRU(unsigned int index, unsigned int tag) {
     
     // set params
     minBlock->clockTm = CLOCK;
-    minBlock->clockTm = tag;
+    minBlock->tag = tag;
     minBlock->valid = 1;
 }
 
