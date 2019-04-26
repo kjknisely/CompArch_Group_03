@@ -1,0 +1,192 @@
+Iteration: 10
+Minutes so far: 1.1961414257685343
+
+Iteration: 20
+Minutes so far: 2.307904775937398
+
+Issue with input parms: ('Trace/A-9_new1.5.pdf.trc', 1, 'RR', 64, 16)
+
+Iteration: 30
+Minutes so far: 3.448895037174225
+
+Iteration: 40
+Minutes so far: 4.555110867818197
+
+Issue with input parms: ('Trace/A-9_new1.5.pdf.trc', 1, 'LRU', 64, 16)
+
+Iteration: 50
+Minutes so far: 5.6572011311848955
+
+Iteration: 60
+Minutes so far: 6.784154756863912
+
+Iteration: 70
+Minutes so far: 7.905203052361807
+
+Issue with input parms: ('Trace/A-9_new1.5.pdf.trc', 1, 'RND', 64, 16)
+
+Iteration: 80
+Minutes so far: 8.240557690461477
+
+Iteration: 90
+Minutes so far: 8.390473214785258
+
+Issue with input parms: ('Trace/Corruption1.trc', 1, 'RR', 64, 16)
+
+Iteration: 100
+Minutes so far: 8.521424372990927
+
+Iteration: 110
+Minutes so far: 8.630143010616303
+
+Iteration: 120
+Minutes so far: 8.749331482251485
+
+Issue with input parms: ('Trace/Corruption1.trc', 1, 'LRU', 64, 16)
+
+Iteration: 130
+Minutes so far: 8.848625560601553
+
+Iteration: 140
+Minutes so far: 8.954881612459818
+
+Issue with input parms: ('Trace/Corruption1.trc', 1, 'RND', 64, 16)
+
+Iteration: 150
+Minutes so far: 9.036545352141063
+
+Iteration: 160
+Minutes so far: 9.10410163005193
+
+Issue with input parms: ('Trace/TestTrace.trc', 1, 'RR', 64, 16)
+
+Iteration: 170
+Minutes so far: 9.164781753222147
+
+Iteration: 180
+Minutes so far: 9.215383239587148
+
+Iteration: 190
+Minutes so far: 9.265057281653087
+
+Issue with input parms: ('Trace/TestTrace.trc', 1, 'LRU', 64, 16)
+
+Iteration: 200
+Minutes so far: 9.311333437760672
+
+Iteration: 210
+Minutes so far: 9.352615241209666
+
+Issue with input parms: ('Trace/TestTrace.trc', 1, 'RND', 64, 16)
+
+Iteration: 220
+Minutes so far: 9.401014339923858
+
+Iteration: 230
+Minutes so far: 9.449721320470173
+
+Iteration: 240
+Minutes so far: 9.491794919967651
+
+Issue with input parms: ('Trace/TinyTrace.trc', 1, 'RR', 64, 16)
+
+Iteration: 250
+Minutes so far: 9.539497303962708
+
+Iteration: 260
+Minutes so far: 9.577432799339295
+
+Issue with input parms: ('Trace/TinyTrace.trc', 1, 'LRU', 64, 16)
+
+Iteration: 270
+Minutes so far: 9.620714092254639
+
+Iteration: 280
+Minutes so far: 9.666788025697072
+
+Issue with input parms: ('Trace/TinyTrace.trc', 1, 'RND', 64, 16)
+
+Iteration: 290
+Minutes so far: 9.720367721716563
+
+Iteration: 300
+Minutes so far: 9.804704451560974
+
+Iteration: 310
+Minutes so far: 9.92649450302124
+
+Issue with input parms: ('Trace/Trace1.trc', 1, 'RR', 64, 16)
+
+Iteration: 320
+Minutes so far: 10.08089934984843
+
+Iteration: 330
+Minutes so far: 10.22444687684377
+
+Issue with input parms: ('Trace/Trace1.trc', 1, 'LRU', 64, 16)
+
+Iteration: 340
+Minutes so far: 10.413047162691752
+
+Iteration: 350
+Minutes so far: 10.569220892588298
+
+Iteration: 360
+Minutes so far: 10.706592003504435
+
+Issue with input parms: ('Trace/Trace1.trc', 1, 'RND', 64, 16)
+
+Iteration: 370
+Minutes so far: 10.819876976807912
+
+Iteration: 380
+Minutes so far: 10.930444637934366
+
+Issue with input parms: ('Trace/Trace1A.trc', 1, 'RR', 64, 16)
+
+Iteration: 390
+Minutes so far: 11.098658053080241
+
+Iteration: 400
+Minutes so far: 11.25603955189387
+
+Issue with input parms: ('Trace/Trace1A.trc', 1, 'LRU', 64, 16)
+
+Iteration: 410
+Minutes so far: 11.419467667738596
+
+Iteration: 420
+Minutes so far: 11.568772502740224
+
+Iteration: 430
+Minutes so far: 11.734415356318156
+
+Issue with input parms: ('Trace/Trace1A.trc', 1, 'RND', 64, 16)
+
+Iteration: 440
+Minutes so far: 12.08178751071294
+
+Iteration: 450
+Minutes so far: 12.818753107388813
+
+Issue with input parms: ('Trace/Trace2A.trc', 1, 'RR', 64, 16)
+
+Iteration: 460
+Minutes so far: 13.641138410568237
+
+Iteration: 470
+Minutes so far: 14.523308706283569
+
+Iteration: 480
+Minutes so far: 15.413339761892955
+
+Issue with input parms: ('Trace/Trace2A.trc', 1, 'LRU', 64, 16)
+
+Iteration: 490
+Minutes so far: 16.317678022384644
+
+Iteration: 500
+Minutes so far: 17.203828891118366
+
+Issue with input parms: ('Trace/Trace2A.trc', 1, 'RND', 64, 16)
+

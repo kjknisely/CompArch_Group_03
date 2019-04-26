@@ -92,7 +92,7 @@ int main(int argc, char *argv[]){
     freeCache();
 
     fclose(infp);
-    return 1;
+    return 0;
 }
 
 /*
